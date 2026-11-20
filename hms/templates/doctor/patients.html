@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Patients - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Patients Directory</h1>
+  <form method="get" action="{{ url_for('doctor.patients') }}" class="inline-form">
+    <input type="text" name="q" value="{{ search_query }}" placeholder="Search name, email, phone..." style="width: 240px;">
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  </form>
+</div>
+
+<div class="card">
+  {% if patients %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Age</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in patients %}
+            <tr>
+              <td><strong>{{ p.name }}</strong></td>
+              <td>{{ p.email }}</td>
+              <td>{{ p.phone }}</td>
+              <td>{{ p.age or '-' }}</td>
+              <td>
+                <a href="{{ url_for('doctor.patient_detail', patient_id=p.id) }}" class="btn btn-primary btn-sm">Open Patient</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p>No matching patients found.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

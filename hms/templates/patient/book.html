@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Book Appointment - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <svg class="icon" style="color: var(--teal);" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+      <path d="M16 2v4M8 2v4M3 10h18"></path>
+    </svg>
+    Book Appointment
+  </h1>
+</div>
+
+<div class="card">
+  <form method="get" action="{{ url_for('patient.book') }}" class="grid grid-3" style="align-items: end;">
+    {% if hospital_id %}
+      <input type="hidden" name="hospital_id" value="{{ hospital_id }}">
+    {% endif %}
+    <div class="form-group" style="margin-bottom: 0;">
+      <label for="filter_doctor">Choose Doctor</label>
+      <select id="filter_doctor" name="doctor_id">
+        {% for doc in doctors %}
+          <option value="{{ doc.id }}" {% if doc.id == selected_doctor_id %}selected{% endif %}>
+            {{ doc.user.name }} — {{ doc.department }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom: 0;">
+      <label for="filter_date">Appointment Date</label>
+      <input type="date" id="filter_date" name="date" value="{{ selected_date }}" required>
+    </div>
+    <div>
+      <button type="submit" class="btn btn-outline btn-block">Show Slots</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <form method="post" action="{{ url_for('patient.book') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="doctor_id" value="{{ selected_doctor_id }}">
+    <input type="hidden" name="date" value="{{ selected_date }}">
+
+    <h2>Available Slots for {{ selected_date }}</h2>
+    {% if slots %}
+      <div class="slot-grid">
+        {% for slot in slots %}
+          <label class="slot-option {% if slot.status == 'booked' %}slot-booked{% endif %}">
+            <input
+              type="radio"
+              name="slot_id"
+              value="{{ slot.id }}"
+              {% if slot.status == 'booked' %}disabled{% endif %}
+            >
+            <strong>{{ slot.start_time.strftime('%I:%M %p') }}</strong>
+            <span class="muted">{{ 'Booked' if slot.status == 'booked' else 'Available' }}</span>
+          </label>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state" style="padding: 1rem;">
+        <p>No slots scheduled for this date. You can still submit a waitlist request below.</p>
+      </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label for="reason">Reason for Visit</label>
+      <textarea id="reason" name="reason" required placeholder="Describe your symptoms or reason for consultation"></textarea>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+      {% if has_free_slots %}
+        <button type="submit" class="btn btn-primary">Book Selected Slot</button>
+        <button type="submit" name="waitlist" value="1" class="btn btn-outline">Preferred Slot Full? Join Waitlist</button>
+      {% else %}
+        <button type="submit" name="waitlist" value="1" class="btn btn-danger">Join Waitlist (No Free Slots)</button>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

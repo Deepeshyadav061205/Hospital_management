@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Records &amp; Lab Tests - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <svg class="icon" style="color: var(--teal);" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 4h6v3H9z"></path>
+      <rect x="5" y="5" width="14" height="16" rx="2"></rect>
+      <path d="M9 12h6M9 16h4"></path>
+    </svg>
+    Medical Records &amp; Lab Tests
+  </h1>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Medical Records</h2>
+    {% if records %}
+      {% for rec in records %}
+        <div style="padding: 0.85rem 0; border-bottom: 1px solid var(--border);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong>{{ rec.diagnosis }}</strong>
+            <span class="badge badge-{{ rec.status }}">{{ rec.status }}</span>
+          </div>
+          <p class="muted" style="margin: 0.3rem 0;">
+            Doctor: {{ rec.doctor.user.name }} ({{ rec.doctor.department }}) &middot; {{ rec.created_at.strftime('%d %b %Y') }}
+          </p>
+          <p style="margin: 0.35rem 0;"><strong>Prescription:</strong> {{ rec.prescription }}</p>
+          <a href="{{ url_for('patient.record_detail', record_id=rec.id) }}" class="btn btn-outline btn-sm">Open Record</a>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <p>No medical records yet.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Request a Lab Test</h2>
+      <form method="post" action="{{ url_for('patient.create_lab_test_request') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label for="test_name">Test Name</label>
+          <input type="text" id="test_name" name="test_name" required placeholder="e.g. Complete Blood Count (CBC)">
+        </div>
+        {% if records %}
+        <div class="form-group">
+          <label for="record_id">Link to Record (Optional)</label>
+          <select id="record_id" name="record_id">
+            <option value="">None</option>
+            {% for rec in records %}
+              <option value="{{ rec.id }}">#{{ rec.id }} - {{ rec.diagnosis }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Request Lab Test</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>My Lab Tests</h2>
+      {% if lab_tests %}
+        {% for test in lab_tests %}
+          <div style="padding: 0.75rem 0; border-bottom: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong>{{ test.test_name }}</strong>
+              <span class="badge badge-{{ test.status }}">{{ test.status }}</span>
+            </div>
+            {% if test.report_text %}
+              <p style="margin: 0.4rem 0 0;"><strong>Report:</strong> {{ test.report_text }}</p>
+            {% else %}
+              <p class="muted" style="margin: 0.3rem 0 0;">Report pending doctor review.</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <p>No lab tests requested yet.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

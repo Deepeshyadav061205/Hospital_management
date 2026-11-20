@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}My Bills - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <svg class="icon" style="color: var(--teal);" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 4h12M6 9h12M9 4c3 0 5 2 5 5s-2 5-5 5H6l8 6"></path>
+    </svg>
+    My Bills &amp; Receipts
+  </h1>
+</div>
+
+<div class="card">
+  {% if bills %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Bill #</th>
+            <th>Total</th>
+            <th>Paid</th>
+            <th>Balance Due</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bill in bills %}
+            <tr>
+              <td>#{{ bill.id }}</td>
+              <td>₹{{ "%.2f"|format(bill.amount) }}</td>
+              <td>₹{{ "%.2f"|format(bill.paid_amount) }}</td>
+              <td><strong>₹{{ "%.2f"|format(bill.balance_due) }}</strong></td>
+              <td>{{ bill.due_date.strftime('%d %b %Y') }}</td>
+              <td><span class="badge badge-{{ bill.status }}">{{ bill.status }}</span></td>
+              <td>
+                <div class="inline-form">
+                  <a href="{{ url_for('patient.bill_detail', bill_id=bill.id) }}" class="btn btn-primary btn-sm">
+                    {{ 'View / Pay' if bill.status != 'paid' else 'View' }}
+                  </a>
+                  <a href="{{ url_for('patient.download_receipt', bill_id=bill.id) }}" class="btn btn-outline btn-sm">
+                    PDF Receipt
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p>No bills on your account right now.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Lab &amp; Medical Reports - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <svg class="icon" style="color: var(--teal);" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 4h6v3H9z"></path>
+      <rect x="5" y="5" width="14" height="16" rx="2"></rect>
+      <path d="M9 12h6M9 16h4"></path>
+    </svg>
+    Lab Reports &amp; Clinical Records
+  </h1>
+</div>
+
+<div class="card">
+  <h2>Lab Tests Queue &amp; Reports</h2>
+  {% if lab_tests %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Test Name</th>
+            <th>Status</th>
+            <th>Report / Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for test in lab_tests %}
+            <tr>
+              <td>
+                <a href="{{ url_for('doctor.patient_detail', patient_id=test.patient_id) }}">
+                  <strong>{{ test.patient.name }}</strong>
+                </a>
+              </td>
+              <td>{{ test.test_name }}</td>
+              <td><span class="badge badge-{{ test.status }}">{{ test.status }}</span></td>
+              <td>
+                {% if test.status == 'completed' %}
+                  {{ test.report_text }}
+                {% else %}
+                  <div class="inline-form">
+                    {% if test.status == 'requested' %}
+                      <form method="post" action="{{ url_for('doctor.approve_test', test_id=test.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="next" value="{{ url_for('doctor.reports') }}">
+                        <button type="submit" class="btn btn-outline btn-sm">Approve</button>
+                      </form>
+                    {% endif %}
+                    <form method="post" action="{{ url_for('doctor.complete_test', test_id=test.id) }}" class="inline-form">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="next" value="{{ url_for('doctor.reports') }}">
+                      <input type="text" name="report_text" required placeholder="Report text..." style="width: 200px; min-height: 38px;">
+                      <button type="submit" class="btn btn-primary btn-sm">Complete</button>
+                    </form>
+                  </div>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p>No lab tests in the system yet.</p>
+    </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Recent Patient Records</h2>
+  {% if records %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Diagnosis</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rec in records %}
+            <tr>
+              <td>{{ rec.created_at.strftime('%d %b %Y') }}</td>
+              <td><a href="{{ url_for('doctor.patient_detail', patient_id=rec.patient_id) }}">{{ rec.patient.name }}</a></td>
+              <td>{{ rec.doctor.user.name }}</td>
+              <td>{{ rec.diagnosis }}</td>
+              <td><span class="badge badge-{{ rec.status }}">{{ rec.status }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p>No clinical records yet.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

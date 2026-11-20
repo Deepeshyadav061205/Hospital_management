@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Doctor Dashboard - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Doctor Dashboard — {{ user.name }}</h1>
+  <a href="{{ url_for('doctor.requests_list') }}" class="btn btn-primary">Review Requests</a>
+</div>
+
+<div class="grid grid-3">
+  <div class="card stat-card">
+    <div class="stat-icon">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+        <path d="M16 2v4M8 2v4M3 10h18"></path>
+      </svg>
+    </div>
+    <div>
+      <div class="stat-value">{{ todays_appointments|length }}</div>
+      <div class="stat-label">Today's Appointments</div>
+    </div>
+  </div>
+
+  <div class="card stat-card">
+    <div class="stat-icon">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 4h12M6 9h12M9 4c3 0 5 2 5 5s-2 5-5 5H6l8 6"></path>
+      </svg>
+    </div>
+    <div>
+      <div class="stat-value">{{ pending_bills_count }}</div>
+      <div class="stat-label">Pending Bills</div>
+    </div>
+  </div>
+
+  <div class="card stat-card">
+    <div class="stat-icon">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 4h6v3H9z"></path>
+        <rect x="5" y="5" width="14" height="16" rx="2"></rect>
+        <path d="M9 12h6M9 16h4"></path>
+      </svg>
+    </div>
+    <div>
+      <div class="stat-value">{{ open_requests_count }}</div>
+      <div class="stat-label">Open Requests ({{ pending_labs_count }} pending labs)</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="page-header">
+    <h2>Upcoming Confirmed &amp; Active Visits</h2>
+    <a href="{{ url_for('doctor.requests_list') }}">Manage all appointments</a>
+  </div>
+  {% if upcoming_appointments %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Slot Time</th>
+            <th>Reason</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for appt in upcoming_appointments %}
+            <tr>
+              <td><a href="{{ url_for('doctor.patient_detail', patient_id=appt.patient_id) }}"><strong>{{ appt.patient.name }}</strong></a></td>
+              <td>{{ appt.doctor.user.name }}</td>
+              <td>{{ appt.slot.start_time.strftime('%d %b %Y, %I:%M %p') }}</td>
+              <td>{{ appt.reason }}</td>
+              <td><span class="badge badge-{{ appt.status }}">{{ appt.status }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p>No confirmed visits scheduled yet.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

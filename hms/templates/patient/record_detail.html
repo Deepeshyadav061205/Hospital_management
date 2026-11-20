@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Record #{{ record.id }} - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Medical Record #{{ record.id }}</h1>
+  <a href="{{ url_for('patient.records') }}" class="btn btn-outline">Back to Records</a>
+</div>
+
+<div class="card">
+  <p><strong>Doctor:</strong> {{ record.doctor.user.name }} ({{ record.doctor.department }})</p>
+  <p><strong>Date:</strong> {{ record.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+  <p><strong>Status:</strong> <span class="badge badge-{{ record.status }}">{{ record.status }}</span></p>
+  <p><strong>Diagnosis:</strong> {{ record.diagnosis }}</p>
+  <p><strong>Prescription:</strong> {{ record.prescription }}</p>
+</div>
+{% endblock %}

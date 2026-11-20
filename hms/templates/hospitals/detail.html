@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}{{ hospital.name }} - CityCare Hospital{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 style="margin-bottom: 0.2rem;">{{ hospital.name }}</h1>
+    <p class="muted" style="margin: 0;">{{ hospital.city.name }}, {{ hospital.city.state }}</p>
+  </div>
+  <a href="{{ url_for('hospitals.by_city', city_name=hospital.city.name) }}" class="btn btn-outline">Back to {{ hospital.city.name }}</a>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Hospital Information</h2>
+    <p><strong>Address:</strong> {{ hospital.address }}</p>
+    <p><strong>Phone:</strong> {{ hospital.phone }}</p>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.85rem 0;">
+      <span class="stat-pill {% if alerts.beds %}stat-pill-low{% endif %}">
+        Beds Available: {{ hospital.available_beds }} / {{ hospital.total_beds }}
+      </span>
+      <span class="stat-pill {% if alerts.icu %}stat-pill-low{% endif %}">
+        ICU Available: {{ hospital.available_icu }} / {{ hospital.total_icu }}
+      </span>
+    </div>
+
+    {% if alerts.beds or alerts.icu or alerts.blood %}
+      <div class="alert alert-error" style="margin-top: 0.75rem;">
+        Low availability alert:
+        {% if alerts.beds %}Beds &le; 10%. {% endif %}
+        {% if alerts.icu %}ICU &le; 10%. {% endif %}
+        {% if alerts.blood %}Low blood units (&lt; 5): {{ alerts.blood|join(', ') }}.{% endif %}
+      </div>
+    {% endif %}
+
+    <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;">
+    <h3>Doctors</h3>
+    {% if hospital.doctors %}
+      <ul style="padding-left: 1.2rem; margin-top: 0.4rem;">
+        {% for doc in hospital.doctors %}
+          <li><strong>{{ doc.user.name }}</strong> — {{ doc.department }}</li>
+        {% endfor %}
+      </ul>
+      {% if current_user and current_user.role == 'patient' %}
+        <a href="{{ url_for('patient.book', hospital_id=hospital.id) }}" class="btn btn-primary">Book appointment</a>
+      {% elif not current_user %}
+        <p class="muted"><a href="{{ url_for('auth.login') }}">Log in as a patient</a> to book an appointment.</p>
+      {% endif %}
+    {% else %}
+      <p class="muted">No doctors online yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Location</h2>
+    <div
+      id="hospital-map"
+      class="hospital-map"
+      data-hospitals='{{ hospitals_json|tojson }}'
+      data-center-lat="{{ hospital.lat }}"
+      data-center-lng="{{ hospital.lng }}"
+      data-zoom="14"
+    ></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Blood Bank Availability</h2>
+  <div class="table-wrap">
+    <table style="min-width: 100%;">
+      <thead>
+        <tr>
+          <th>Blood Group</th>
+          <th>Units Available</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stock in hospital.blood_stocks %}
+          {% set is_low = stock.blood_group in alerts.blood %}
+          <tr>
+            <td><strong>{{ stock.blood_group }}</strong></td>
+            <td>{{ stock.units }} units</td>
+            <td>
+              <span class="chip {% if is_low %}chip-low{% endif %}">
+                {{ 'Low Stock' if is_low else 'Available' }}
+              </span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+{% endblock %}

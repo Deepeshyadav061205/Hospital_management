@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Find Hospitals - CityCare Hospital{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <svg class="icon" style="color: var(--teal);" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 21s-6-5.33-6-10a6 6 0 1 1 12 0c0 4.67-6 10-6 10z"></path>
+      <circle cx="12" cy="11" r="2.2"></circle>
+    </svg>
+    Find Hospitals by City
+  </h1>
+</div>
+
+<div class="card">
+  <h2>Hospitals Map</h2>
+  <div id="hospital-map" class="hospital-map" data-hospitals='{{ hospitals_json|tojson }}'></div>
+</div>
+
+{% if cities %}
+  <div class="grid grid-3">
+    {% for city in cities %}
+      <a href="{{ url_for('hospitals.by_city', city_name=city.name) }}" class="card city-card" style="margin-bottom: 0;">
+        <div class="stat-icon">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+            <path d="M12 7v10M7 12h10"></path>
+          </svg>
+        </div>
+        <div>
+          <strong style="font-size: 1.1rem; color: var(--deep-teal);">{{ city.name }}</strong>
+          <div class="muted">{{ city.state }}</div>
+          <div class="muted">{{ city.hospitals|length }} hospitals</div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card empty-state">
+    <p>No cities available yet.</p>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+{% endblock %}

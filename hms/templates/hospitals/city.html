@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ city.name }} Hospitals - CityCare Hospital{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 style="margin-bottom: 0.2rem;">Hospitals in {{ city.name }}</h1>
+    <p class="muted" style="margin: 0;">{{ city.state }} &middot; Sorted by distance from city center</p>
+  </div>
+  <a href="{{ url_for('hospitals.index') }}" class="btn btn-outline">All Cities</a>
+</div>
+
+<div class="card">
+  <div
+    id="hospital-map"
+    class="hospital-map"
+    data-hospitals='{{ hospitals_json|tojson }}'
+    data-center-lat="{{ city.lat }}"
+    data-center-lng="{{ city.lng }}"
+    data-zoom="12"
+  ></div>
+</div>
+
+{% if hospitals %}
+  <div class="grid grid-2">
+    {% for h in hospitals %}
+      {% set alert = alerts[h.id] %}
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
+          <div>
+            <h2 style="margin-bottom: 0.2rem;">{{ h.name }}</h2>
+            <p class="muted" style="margin: 0;">{{ h.address }} &middot; <strong>{{ "%.1f"|format(h.distance_km) }} km</strong> from center</p>
+          </div>
+          <a href="{{ url_for('hospitals.detail', hospital_id=h.id) }}" class="btn btn-primary btn-sm">View Details</a>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.9rem;">
+          <span class="stat-pill {% if alert.beds %}stat-pill-low{% endif %}">
+            Beds: {{ h.available_beds }} / {{ h.total_beds }}
+          </span>
+          <span class="stat-pill {% if alert.icu %}stat-pill-low{% endif %}">
+            ICU: {{ h.available_icu }} / {{ h.total_icu }}
+          </span>
+        </div>
+
+        <div class="blood-chips">
+          {% for stock in h.blood_stocks %}
+            <span class="chip {% if stock.blood_group in alert.blood %}chip-low{% endif %}">
+              {{ stock.blood_group }}: {{ stock.units }}
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card empty-state">
+    <p>No hospitals found in {{ city.name }}.</p>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+{% endblock %}

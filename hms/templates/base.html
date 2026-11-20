@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CityCare Hospital{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-inner">
+      <a class="brand" href="{{ url_for('auth.index') }}">
+        <!-- Medical Plus Icon -->
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+          <path d="M12 7v10M7 12h10"></path>
+        </svg>
+        <span>CityCare Hospital</span>
+      </a>
+
+      <button type="button" class="nav-toggle" id="nav-toggle">Menu</button>
+      <nav class="nav-links" id="nav-links">
+        <a href="{{ url_for('hospitals.index') }}">Find Hospitals</a>
+        {% if current_user %}
+          {% if current_user.role == 'patient' %}
+            <a href="{{ url_for('patient.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('patient.book') }}">Book Appointment</a>
+            <a href="{{ url_for('patient.appointments') }}">My Appointments</a>
+            <a href="{{ url_for('patient.bills') }}">Bills</a>
+            <a href="{{ url_for('patient.records') }}">Records &amp; Labs</a>
+            <a href="{{ url_for('patient.notices') }}">Notices</a>
+          {% elif current_user.role == 'doctor' %}
+            <a href="{{ url_for('doctor.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('doctor.requests_list') }}">Requests</a>
+            <a href="{{ url_for('doctor.patients') }}">Patients</a>
+            <a href="{{ url_for('doctor.reports') }}">Reports</a>
+            <a href="{{ url_for('doctor.hospital') }}">My Hospital</a>
+          {% endif %}
+          <span class="nav-user">{{ current_user.name }}</span>
+          <form class="nav-logout-form" method="post" action="{{ url_for('auth.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-nav-logout">Logout</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Login</a>
+          <a href="{{ url_for('auth.register') }}">Register</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-list">
+          {% for category, msg in messages %}
+            <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

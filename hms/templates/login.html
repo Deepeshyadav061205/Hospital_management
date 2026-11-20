@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Login - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1 class="page-title">
+      <svg class="icon" style="color: var(--teal);" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+        <path d="M12 7v10M7 12h10"></path>
+      </svg>
+      Sign In
+    </h1>
+    <p class="muted">Access your CityCare Hospital portal.</p>
+
+    <form method="post" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" required placeholder="aman@example.com">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required placeholder="Enter password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Login</button>
+    </form>
+
+    <p class="muted" style="margin-top: 1rem; text-align: center;">
+      New patient? <a href="{{ url_for('auth.register') }}">Create an account</a> &middot;
+      <a href="{{ url_for('hospitals.index') }}">Find Hospitals</a>
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Demo Login Credentials</h3>
+    <p class="muted" style="margin-bottom: 0.4rem;">
+      <strong>Doctor:</strong> mehta@citycare.com / Doctor@123<br>
+      <strong>Doctor:</strong> rao@citycare.com / Doctor@123<br>
+      <strong>Patient:</strong> aman@example.com / Patient@123<br>
+      <strong>Patient:</strong> neha@example.com / Patient@123
+    </p>
+  </div>
+</div>
+{% endblock %}

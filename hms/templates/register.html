@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Register - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h1>Patient Registration</h1>
+    <p class="muted">Create your CityCare Hospital account to book visits and view records.</p>
+
+    <form method="post" action="{{ url_for('auth.register') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" required placeholder="e.g. Rohan Kapoor">
+      </div>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" required placeholder="rohan@example.com">
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="text" id="phone" name="phone" required placeholder="9876500099">
+      </div>
+      <div class="form-group">
+        <label for="age">Age</label>
+        <input type="number" id="age" name="age" min="1" max="120" required placeholder="30">
+      </div>
+      <div class="form-group">
+        <label for="password">Password (min 6 characters)</label>
+        <input type="password" id="password" name="password" minlength="6" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Register</button>
+    </form>
+
+    <p class="muted" style="margin-top: 1rem; text-align: center;">
+      Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

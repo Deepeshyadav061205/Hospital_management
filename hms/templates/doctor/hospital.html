@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}My Hospital Availability - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 style="margin-bottom: 0.2rem;">{{ hospital.name }}</h1>
+    <p class="muted" style="margin: 0;">{{ hospital.city.name }}, {{ hospital.city.state }} &middot; Live public availability</p>
+  </div>
+  <a href="{{ url_for('hospitals.detail', hospital_id=hospital.id) }}" class="btn btn-outline">View Public Page</a>
+</div>
+
+<div class="card">
+  <form method="post" action="{{ url_for('doctor.hospital') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <h2>Beds &amp; ICU Capacity</h2>
+    <div class="grid grid-2">
+      <div class="form-group">
+        <label for="available_beds">Available Beds</label>
+        <input type="number" id="available_beds" name="available_beds" min="0" value="{{ hospital.available_beds }}" required>
+      </div>
+      <div class="form-group">
+        <label for="total_beds">Total Beds</label>
+        <input type="number" id="total_beds" name="total_beds" min="0" value="{{ hospital.total_beds }}" required>
+      </div>
+      <div class="form-group">
+        <label for="available_icu">Available ICU Beds</label>
+        <input type="number" id="available_icu" name="available_icu" min="0" value="{{ hospital.available_icu }}" required>
+      </div>
+      <div class="form-group">
+        <label for="total_icu">Total ICU Beds</label>
+        <input type="number" id="total_icu" name="total_icu" min="0" value="{{ hospital.total_icu }}" required>
+      </div>
+    </div>
+
+    <h2>Blood Bank Stock (Units)</h2>
+    {% set stock_map = {} %}
+    {% for s in hospital.blood_stocks %}
+      {% set _ = stock_map.update({s.blood_group: s.units}) %}
+    {% endfor %}
+
+    <div class="grid grid-3">
+      {% for group in blood_groups %}
+        <div class="form-group">
+          <label for="blood_{{ group }}">{{ group }}</label>
+          <input type="number" id="blood_{{ group }}" name="blood_{{ group }}" min="0" value="{{ stock_map.get(group, 0) }}" required>
+        </div>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Availability</button>
+  </form>
+</div>
+{% endblock %}

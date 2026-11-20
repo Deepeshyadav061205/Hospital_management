@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Appointment Requests - CityCare Hospital{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <svg class="icon" style="color: var(--teal);" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+      <path d="M16 2v4M8 2v4M3 10h18"></path>
+    </svg>
+    Appointment Requests &amp; Visits
+  </h1>
+</div>
+
+<div class="card">
+  {% if appointments %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Slot</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for appt in appointments %}
+            <tr>
+              <td>
+                <a href="{{ url_for('doctor.patient_detail', patient_id=appt.patient_id) }}">
+                  <strong>{{ appt.patient.name }}</strong>
+                </a><br>
+                <span class="muted">{{ appt.patient.phone }}</span>
+              </td>
+              <td>{{ appt.doctor.user.name }}</td>
+              <td>
+                {% if appt.slot %}
+                  {{ appt.slot.start_time.strftime('%d %b %Y, %I:%M %p') }}
+                {% else %}
+                  <span class="muted">No slot assigned</span>
+                {% endif %}
+              </td>
+              <td>{{ appt.reason }}</td>
+              <td><span class="badge badge-{{ appt.status }}">{{ appt.status.replace('_', ' ') }}</span></td>
+              <td>
+                <div class="inline-form">
+                  {% if appt.status == 'requested' %}
+                    <form method="post" action="{{ url_for('doctor.appointment_action', appointment_id=appt.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="action" value="review">
+                      <button type="submit" class="btn btn-outline btn-sm">Review</button>
+                    </form>
+                  {% endif %}
+                  {% if appt.status in ('requested', 'under_review') %}
+                    <form method="post" action="{{ url_for('doctor.appointment_action', appointment_id=appt.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="action" value="confirm">
+                      <button type="submit" class="btn btn-primary btn-sm">Confirm</button>
+                    </form>
+                  {% endif %}
+                  {% if appt.status == 'confirmed' %}
+                    <form method="post" action="{{ url_for('doctor.appointment_action', appointment_id=appt.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="action" value="checkin">
+                      <button type="submit" class="btn btn-primary btn-sm">Check In</button>
+                    </form>
+                  {% endif %}
+                  {% if appt.status == 'visited' %}
+                    <form method="post" action="{{ url_for('doctor.appointment_action', appointment_id=appt.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="action" value="close">
+                      <button type="submit" class="btn btn-primary btn-sm">Close Visit</button>
+                    </form>
+                  {% endif %}
+                  {% if appt.status in ('requested', 'under_review', 'confirmed', 'waitlisted') %}
+                    <form method="post" action="{{ url_for('doctor.appointment_action', appointment_id=appt.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <input type="hidden" name="action" value="reject">
+                      <button type="submit" class="btn btn-danger btn-sm" data-confirm="Reject/cancel this appointment?">Reject</button>
+                    </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <p>No appointment requests found.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
